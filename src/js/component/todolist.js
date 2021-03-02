@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 
 export function Home() {
-	const [theList, setList] = useState([""]);
+	const [theList, setList] = useState([]);
 
-	const [userInput, setUserInput] = useState([""]); // set initial userInput as blank
+	const [userInput, setUserInput] = useState(""); // set initial userInput as blank
 
 	useEffect(() => {
-		fetch("https://assets.breatheco.de/apis/fake/todos/user/amafjarkasi")
+		fetch("https://3000-yellow-lizard-t3xu99la.ws-us03.gitpod.io/task")
 			.then(function(response) {
 				if (!response.ok) {
 					throw Error(response.statusText);
@@ -23,23 +23,15 @@ export function Home() {
 
 	const handleKeyUp = event => {
 		if (event.keyCode == 13 && userInput != "") {
-			setList(
-				theList.concat({
-					label: userInput,
-					done: false
-				})
-			);
-
 			fetch(
-				"https://assets.breatheco.de/apis/fake/todos/user/amafjarkasi",
+				"https://3000-yellow-lizard-t3xu99la.ws-us03.gitpod.io/task",
 				{
-					method: "PUT",
-					body: JSON.stringify(
-						theList.concat({
-							label: userInput,
-							done: false
-						})
-					),
+					method: "POST",
+					body: JSON.stringify({
+						label: userInput,
+						done: false,
+						user: "amaf"
+					}),
 					// label, done
 					headers: {
 						"Content-Type": "application/json"
@@ -54,25 +46,7 @@ export function Home() {
 				})
 				.then(response => {
 					console.log("Success:", response);
-					fetch(
-						"https://assets.breatheco.de/apis/fake/todos/user/amafjarkasi"
-					)
-						.then(function(response) {
-							if (!response.ok) {
-								throw Error(response.statusText);
-							}
-							return response.json(); // Read the response as json.
-						})
-						.then(function(responseAsJson) {
-							setList(responseAsJson); // Set json into list
-							setUserInput("");
-						})
-						.catch(function(error) {
-							console.log(
-								"Looks like there was a problem: \n",
-								error
-							);
-						});
+					setList(response);
 				})
 				.catch(error => console.error("Error:", error));
 		}
@@ -81,20 +55,14 @@ export function Home() {
 	// check if event keycode is 13 (enter) and input is not blank to continue
 	// use state setList to add concat version of userInput into theList
 
-	const itemDelete = index => {
-		var updatedList = theList.filter(
-			(task, taskIndex) => index != taskIndex
-		);
-		setList(updatedList);
-
-		fetch("https://assets.breatheco.de/apis/fake/todos/user/amafjarkasi", {
-			method: "PUT",
-			body: JSON.stringify(updatedList),
-			// label, done
-			headers: {
-				"Content-Type": "application/json"
+	const itemDelete = id => {
+		fetch(
+			"https://3000-yellow-lizard-t3xu99la.ws-us03.gitpod.io/task/amaf/" +
+				id,
+			{
+				method: "DELETE"
 			}
-		})
+		)
 			.then(response => {
 				if (!response.ok) {
 					throw Error(response.statusText);
@@ -103,24 +71,7 @@ export function Home() {
 			})
 			.then(response => {
 				console.log("Success:", response);
-				fetch(
-					"https://assets.breatheco.de/apis/fake/todos/user/amafjarkasi"
-				)
-					.then(function(response) {
-						if (!response.ok) {
-							throw Error(response.statusText);
-						}
-						return response.json(); // Read the response as json.
-					})
-					.then(function(responseAsJson) {
-						setList(responseAsJson); // Set json into list
-					})
-					.catch(function(error) {
-						console.log(
-							"Looks like there was a problem: \n",
-							error
-						);
-					});
+				setList(response);
 			})
 			.catch(error => console.error("Error:", error));
 	};
@@ -147,7 +98,7 @@ export function Home() {
 									{value.label}
 									<button
 										type="button"
-										onClick={() => itemDelete(index)}
+										onClick={() => itemDelete(value.id)}
 										className="btn btn-primary">
 										X
 									</button>
